@@ -104,6 +104,7 @@ class Account < ApplicationRecord
   scope :sensitized, -> { where.not(sensitized_at: nil) }
   scope :without_suspended, -> { where(suspended_at: nil) }
   scope :without_silenced, -> { where(silenced_at: nil) }
+  scope :without_instance_actor, -> { where.not(id: -99) }
   scope :recent, -> { reorder(id: :desc) }
   scope :bots, -> { where(actor_type: %w(Application Service)) }
   scope :groups, -> { where(actor_type: 'Group') }
@@ -226,7 +227,7 @@ class Account < ApplicationRecord
   end
 
   def suspended?
-    suspended_at.present?
+    suspended_at.present? && !instance_actor?
   end
 
   def suspended_permanently?
@@ -579,17 +580,6 @@ class Account < ApplicationRecord
   end
 
   def clean_feed_manager
-    reblog_key       = FeedManager.instance.key(:home, id, 'reblogs')
-    reblogged_id_set = Redis.current.zrange(reblog_key, 0, -1)
-
-    Redis.current.pipelined do
-      Redis.current.del(FeedManager.instance.key(:home, id))
-      Redis.current.del(reblog_key)
-
-      reblogged_id_set.each do |reblogged_id|
-        reblog_set_key = FeedManager.instance.key(:home, id, "reblogs:#{reblogged_id}")
-        Redis.current.del(reblog_set_key)
-      end
-    end
+    FeedManager.instance.clean_feeds!(:home, [id])
   end
 end
