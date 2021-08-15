@@ -334,11 +334,11 @@
   }
 }
 
-.star-icon.active {
+.icon-button.star-icon.active {
   color: $gold-star;
 }
 
-.bookmark-icon.active {
+.icon-button.bookmark-icon.active {
   color: $red-bookmark;
 }
 
@@ -977,13 +977,13 @@
     }
 
     @media screen and (max-height: 810px) {
-      .trends__item:nth-child(3) {
+      .trends__item:nth-of-type(3) {
         display: none;
       }
     }
 
     @media screen and (max-height: 720px) {
-      .trends__item:nth-child(2) {
+      .trends__item:nth-of-type(2) {
         display: none;
       }
     }
@@ -1038,7 +1038,7 @@
 .setting-text {
   color: $darker-text-color;
   background: transparent;
-  border: none;
+  border: 0;
   border-bottom: 2px solid $ui-primary-color;
   box-sizing: border-box;
   display: block;
@@ -1232,7 +1232,6 @@ button.icon-button.active i.fa-retweet {
   span {
     display: block;
     float: left;
-    margin-left: 50%;
     transform: translateX(-50%);
     margin: 82px 0 0 50%;
     white-space: nowrap;

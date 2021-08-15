@@ -55,7 +55,6 @@ const initialState = ImmutableMap({
   notifications : ImmutableMap({
     favicon_badge : true,
     tab_badge     : true,
-    show_unread   : true,
   }),
 });
 

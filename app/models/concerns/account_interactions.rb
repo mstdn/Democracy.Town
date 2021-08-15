@@ -67,7 +67,7 @@ module AccountInteractions
     private
 
     def follow_mapping(query, field)
-      query.pluck(field).each_with_object({}) { |id, mapping| mapping[id] = true }
+      query.pluck(field).index_with(true)
     end
   end
 
@@ -80,6 +80,9 @@ module AccountInteractions
 
     has_many :following, -> { order('follows.id desc') }, through: :active_relationships,  source: :target_account
     has_many :followers, -> { order('follows.id desc') }, through: :passive_relationships, source: :account
+
+    # Account notes
+    has_many :account_notes, dependent: :destroy
 
     # Block relationships
     has_many :block_relationships, class_name: 'Block', foreign_key: 'account_id', dependent: :destroy
@@ -182,6 +185,14 @@ module AccountInteractions
 
   def following?(other_account)
     active_relationships.where(target_account: other_account).exists?
+  end
+
+  def following_anyone?
+    active_relationships.exists?
+  end
+
+  def not_following_anyone?
+    !following_anyone?
   end
 
   def blocking?(other_account)

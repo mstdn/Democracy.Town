@@ -4,6 +4,7 @@ class DeleteAccountService < BaseService
   include Payloadable
 
   ASSOCIATIONS_ON_SUSPEND = %w(
+    account_notes
     account_pins
     active_relationships
     aliases
@@ -34,6 +35,7 @@ class DeleteAccountService < BaseService
   # by foreign keys, making them safe to delete without loading
   # into memory
   ASSOCIATIONS_WITHOUT_SIDE_EFFECTS = %w(
+    account_notes
     account_pins
     aliases
     conversation_mutes
@@ -188,8 +190,7 @@ class DeleteAccountService < BaseService
       ids = favourites.pluck(:status_id)
       StatusStat.where(status_id: ids).update_all('favourites_count = GREATEST(0, favourites_count - 1)')
       Chewy.strategy.current.update(StatusesIndex::Status, ids) if Chewy.enabled?
-      # Rails.cache.delete_multi would be better, but we don't have it yet
-      ids.each { |id| Rails.cache.delete("statuses/#{id}") }
+      Rails.cache.delete_multi(ids.map { |id| "statuses/#{id}" })
       favourites.delete_all
     end
   end
