@@ -58,15 +58,16 @@ class Account < ApplicationRecord
     hub_url
   )
 
-  USERNAME_RE = /[a-z0-9_]+([a-z0-9_\.-]+[a-z0-9_]+)?/i
-  MENTION_RE  = /(?<=^|[^\/[:word:]])@((#{USERNAME_RE})(?:@[[:word:]\.\-]+[a-z0-9]+)?)/i
+  USERNAME_RE   = /[a-z0-9_]+([a-z0-9_\.-]+[a-z0-9_]+)?/i
+  MENTION_RE    = /(?<=^|[^\/[:word:]])@((#{USERNAME_RE})(?:@[[:word:]\.\-]+[[:word:]]+)?)/i
+  URL_PREFIX_RE = /\Ahttp(s?):\/\/[^\/]+/
 
+  include Attachmentable
   include AccountAssociations
   include AccountAvatar
   include AccountFinderConcern
   include AccountHeader
   include AccountInteractions
-  include Attachmentable
   include Paginable
   include AccountCounters
   include DomainNormalizable
@@ -381,7 +382,7 @@ class Account < ApplicationRecord
   def synchronization_uri_prefix
     return 'local' if local?
 
-    @synchronization_uri_prefix ||= uri[/http(s?):\/\/[^\/]+\//]
+    @synchronization_uri_prefix ||= "#{uri[URL_PREFIX_RE]}/"
   end
 
   class Field < ActiveModelSerializers::Model
